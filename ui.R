@@ -10,8 +10,10 @@ shinyUI(
                                         actionButton( "read", label = "Read table" ),
                                         br(),
                                         hr(),
-                                        uiOutput(outputId="factorcheckboxes"),
-                                        width = 3),
+                                        uiOutput(outputId="sel.x"), 
+                                        uiOutput(outputId="sel.y"),
+                                        uiOutput(outputId="sel.col")
+                                        ,width = 3),
                                  mainPanel(
                                    tabsetPanel(
                                      tabPanel("Table", br(), dataTableOutput( outputId = "table")),

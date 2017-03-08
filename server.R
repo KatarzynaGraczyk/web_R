@@ -20,9 +20,17 @@ shinyServer(function(input, output, session) {
     values$df_data <- fread(input$file$datapath,  h=T)
   })
   
-  output$factorcheckboxes <- renderUI({
+  output$sel.x <- renderUI({
     factornames <- colnames(values$df_data)
-    checkboxGroupInput(inputId = "variable",label = "Variables:", choices = factornames, selected = "all", inline=FALSE)
+    selectInput(inputId = "variable.x",label = "X axis:", choices = factornames, selected = "all")
+    })
+  output$sel.y <- renderUI({
+    factornames <- colnames(values$df_data)  
+  selectInput(inputId = "variable.y",label = "Y axis:", choices = factornames, selected = "all")
+  })
+  output$sel.col <- renderUI({
+    factornames <- colnames(values$df_data)
+  selectInput(inputId = "variable.color",label = "Group by:", choices = factornames, selected = "all")
   })
   
   output$table <- renderDataTable ({ values$df_data })
