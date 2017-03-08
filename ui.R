@@ -6,7 +6,6 @@ shinyUI(
                              fluidPage(theme = shinytheme("united"),
                                sidebarLayout(
                                  sidebarPanel(fileInput( "file", label = "Input your data" ),
-                                              #helpText(h6("To load file, click - Read table button")),
                                         actionButton( "read", label = "Read table" ),
                                         br(),
                                         hr(),
