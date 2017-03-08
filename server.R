@@ -2,12 +2,6 @@ options(shiny.maxRequestSize=1000*1024^2)
 
 library(ggplot2)
 library(data.table)
-plotType <- function(x, type) {
-  switch(type,
-         A = hist(x),
-         B = barplot(x),
-         C = pie(x))
-}
 
 shinyServer(function(input, output, session) {
   
