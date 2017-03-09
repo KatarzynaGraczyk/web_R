@@ -20,9 +20,9 @@ shinyUI(
                                               br(),
                                               radioButtons("plottype", 
                                                            label = "Select type of plot",
-                                                           choices = list("Boxplot" = 1, 
-                                                                          "Scatterplot" = 2,
-                                                                          "Histogram" = 3),
+                                                           choices = list("Boxplot" = "box", 
+                                                                          "Scatterplot" = "scat",
+                                                                          "Histogram" = "hist"),
                                                            selected = 1, inline = TRUE),
                                               textOutput("warning"),
                                               plotOutput("plot", width = "auto" )

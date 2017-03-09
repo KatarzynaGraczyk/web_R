@@ -31,18 +31,29 @@ shinyServer(function(input, output, session) {
   
    sel.columns <-  reactiveValues(vec = NULL)
    
-  # data_my <- reactive({
-  #  validate(
-  #     need(length(input$variable) == 3, "Please select three features")
-  #   )
-  #   sel.columns$vec <- as.vector(input$variable)
-  #    })
-   
-   output$plot <- renderPlot({
-    ggplot(data = values$df_data) +
-      geom_point(mapping = aes(x = values$df_data[[input$variable.x]], y = values$df_data[[input$variable.y]], color = values$df_data[[input$variable.color]])) +
-      labs(list(title = paste(input$variable.x, "vs" ,input$variable.y, sep = " "), x = input$variable.x, y = input$variable.y))
-  })
+   observeEvent(input$plottype, {
+     if (input$plottype == "box"){
+       output$plot <- renderPlot({
+         ggplot(data = values$df_data) +
+           geom_boxplot(mapping = aes(x = values$df_data[[input$variable.x]], y = values$df_data[[input$variable.y]], color = values$df_data[[input$variable.color]])) +
+           labs(list(title = paste(input$variable.x, "vs" ,input$variable.y, sep = " "), x = input$variable.x, y = input$variable.y))
+         
+       })
+     } else if (input$plottype == "hist") {
+       output$plot <- renderPlot({
+         ggplot(data = values$df_data) +
+           geom_bar(mapping = aes(x = values$df_data[[input$variable.x]], y = values$df_data[[input$variable.y]], color = values$df_data[[input$variable.color]]), stat="identity") +
+           labs(list(title = paste(input$variable.x, "vs" ,input$variable.y, sep = " "), x = input$variable.x, y = input$variable.y))
+         
+       })
+     } else if (input$plottype == "scat") { 
+       output$plot <- renderPlot({
+         ggplot(data = values$df_data) +
+           geom_point(mapping = aes(x = values$df_data[[input$variable.x]], y = values$df_data[[input$variable.y]], color = values$df_data[[input$variable.color]])) +
+           labs(list(title = paste(input$variable.x, "vs" ,input$variable.y, sep = " "), x = input$variable.x, y = input$variable.y))
+       })
+            }
+})
   
   output$summary <- renderPrint({ 
     summary(values$df_data)
