@@ -1,5 +1,7 @@
 library(shinythemes)
 
+
+
 shinyUI(
    navbarPage("My first shiny app",
                     tabPanel("Plots and tables", 
@@ -9,10 +11,10 @@ shinyUI(
                                         actionButton( "read", label = "Read table" ),
                                         br(),
                                         hr(),
-                                        uiOutput(outputId="sel.x"), 
-                                        uiOutput(outputId="sel.y"),
-                                        uiOutput(outputId="sel.col")
-                                        ,width = 3),
+                                        selectInput(inputId = "variable.x",label = "X axis:", choices = "Read table first", selected = "all"),
+                                        selectInput(inputId = "variable.y",label = "Y axis:", choices = "Read table first", selected = "all"),
+                                        selectInput(inputId = "variable.color",label = "Group by:",  choices = "Read table first", selected = "all"),
+                                        width = 3),
                                  mainPanel(
                                    tabsetPanel(
                                      tabPanel("Table", br(), dataTableOutput( outputId = "table")),
