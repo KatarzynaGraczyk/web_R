@@ -57,7 +57,6 @@ shinyServer(function(input, output, session) {
    })
    
    observe({
-     print("render")
      output$plot <- renderPlot({plot.dat$main + plot.dat$layer })
    })
 
