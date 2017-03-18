@@ -48,21 +48,25 @@ shinyServer(function(input, output, session) {
                                                      y = values$df_data[[input$variable.y]])) + 
       theme(axis.text.x = element_text(angle = 90, hjust = 0.5), plot.title = element_text(hjust = 0.5)) +
       labs(list(title = paste(input$variable.x, "vs" ,input$variable.y, sep = " "), x = input$variable.x, y = input$variable.y, color = "Group by:\n"))
-    if (input$plottype == "box") {
-      observeEvent(input$variable.color, {if (input$variable.color == "NULL") {
+      if (input$plottype == "box") {
+      observeEvent(input$variable.color, {
+        if (input$variable.color == "NULL") {
         plot.dat$layer <- geom_boxplot()
       } else {
         plot.dat$layer <- geom_boxplot(mapping = aes(colour = values$df_data[[input$variable.color]]))
       }})
-    }
-     else if (input$plottype == "hist") {
-       observeEvent(input$variable.color, {if (input$variable.color == "NULL") {
+    } 
+    if (input$plottype == "hist") {
+       observeEvent(input$variable.color, {
+         if (input$variable.color == "NULL") {
          plot.dat$layer <- geom_bar(stat = "identity")
        } else {
          plot.dat$layer <- geom_bar(mapping = aes(fill = values$df_data[[input$variable.color]]), stat = "identity", position = "dodge")
        }})
-    } else if (input$plottype == "scat") {
-      observeEvent(input$variable.color, {if (input$variable.color == "NULL") {
+    } 
+    if (input$plottype == "scat") {
+      observeEvent(input$variable.color, {
+        if (input$variable.color == "NULL") {
         plot.dat$layer <- geom_point()
       } else {
         plot.dat$layer <- geom_point(mapping = aes(colour = values$df_data[[input$variable.color]]), stat = "identity")
