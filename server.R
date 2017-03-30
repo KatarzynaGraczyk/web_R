@@ -72,12 +72,35 @@ shinyServer(function(input, output, session) {
         plot.dat$layer <- geom_point(mapping = aes(colour = values$df_data[[input$variable.color]]), stat = "identity")
       }})
         }
-   })
+    output$downloadbutton <- renderUI({
+      downloadButton(outputId = "download", label = " Download the plot")
+    })
+    })
    
    observe({
      output$plot <- renderPlot({plot.dat$main + plot.dat$layer })
+     output$download <- downloadHandler(
+       # specify the file name
+       filename = function() {
+         #paste("output", input$format)
+         if (input$plottype == "box") {
+           paste("boxplot_", input$variable.x,"_vs_", input$variable.y, ".png", sep = "")
+         } else if (input$plottype == "hist") {
+           paste("histogram_", input$variable.x,"_vs_", input$variable.y,  ".png", sep = "")
+         } else if (input$plottype == "scat") {
+           paste("scatterplot_",  input$variable.x,"_vs_", input$variable.y, ".png", sep = "")}
+       }, 
+       content = function(file) {
+         # open the divice
+         # create the plot
+         # close the divice
+         png(file, width = 1200, height = 800, units = "px")
+         print(plot.dat$main + plot.dat$layer )
+         dev.off()
+       })
    })
 
+  
  #--------------------------- summary table -------------------------
   output$summary <- renderPrint({ 
     summary(values$df_data)

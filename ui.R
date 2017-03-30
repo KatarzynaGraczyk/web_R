@@ -31,8 +31,8 @@ shinyUI(
                                                         selected = 1, inline = TRUE),
                                            hr(),
                                            br(),
-                                           selectInput(inputId = "variable.x", label = "X axis:", choices = "Please read file with your data", selected = "all"),
-                                           selectInput(inputId = "variable.y", label = "Y axis:", choices = "Please read file with your data", selected = "all"),
+                                           selectInput(inputId = "variable.x", label = "Select X variable:", choices = "Please read file with your data", selected = "all"),
+                                           selectInput(inputId = "variable.y", label = "Select Y variable:", choices = "Please read file with your data", selected = "all"),
                                            selectInput(inputId = "variable.color",  label = "Group by:", choices = "Please read file with your data", selected = "all"),
                                            width = 3
                                                       ),
@@ -41,7 +41,9 @@ shinyUI(
                                              tabPanel("Plot",
                                                       br(),
                                                       
-                                                      plotOutput("plot", width = "auto" )
+                                                      plotOutput("plot", width = "auto" ), 
+                                                      uiOutput(outputId = "downloadbutton")
+          
                                              ), 
                                              tabPanel("Empty", br()),
                                              tabPanel("Empty", br())
