@@ -17,20 +17,33 @@ shinyServer(function(input, output, session) {
     values$df_data <- fread(input$file$datapath,  h = T)
   })
   
-  generate.checkbox <- reactive({
+  generate.radio <- reactive({
     validate(
       need(input$read, "Please read file with your data")
     )
   })
-  
   output$factorcheckboxes <- renderUI({
-    generate.checkbox()
+    generate.radio()
     factornames <- colnames(values$df_data)
-    checkboxGroupInput(inputId = "variable",label = "Variables:", choices = factornames, selected = "all", inline = FALSE)
+    radioButtons(inputId = "variable",label = "Select one from avaliable variables:", choices = factornames, selected = "all", inline = FALSE)
+  })
+  
+  output$factorselect <- renderUI({ 
+    if (length(input$variable) > 0) {
+    levelnames <- unique(values$df_data[[input$variable]])
+    selectInput(inputId = "factors", label = "Select group of variables to remove:", choices = levelnames, multiple = T)
+    }})
+  
+  observeEvent(input$factors, {
+    values$sel.table <- values$df_data[-which(values$df_data[[input$variable]] %in% input$factors), ]
   })
   
   output$table = renderDataTable({
-    values$df_data
+    if (is.null(values$sel.table)) {
+      values$df_data
+    } else {
+      values$sel.table 
+    }
   })
 # ------------ UI rendering - update select input ----------------
 
@@ -104,6 +117,7 @@ shinyServer(function(input, output, session) {
  #--------------------------- summary table -------------------------
   output$summary <- renderPrint({ 
     summary(values$df_data)
+    input$goback
   })
    
 })

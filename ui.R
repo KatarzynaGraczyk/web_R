@@ -10,6 +10,8 @@ shinyUI(
                                                       br(),
                                                       hr(),
                                                       uiOutput(outputId = "factorcheckboxes"),
+                                                      uiOutput(outputId = "factorselect"),
+                                                    
                                                       width = 3),
                                          mainPanel(
                                            tabsetPanel(
