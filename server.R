@@ -35,11 +35,15 @@ shinyServer(function(input, output, session) {
     }})
   
   observeEvent(input$factors, {
+    if ( is.null(input$factors)) {
+      values$sel.table = NULL
+    } else {
     values$sel.table <- values$df_data[-which(values$df_data[[input$variable]] %in% input$factors), ]
-  })
+  }}
+  )
   
   output$table = renderDataTable({
-    if (is.null(values$sel.table)) {
+    if (is.null(input$factors)) {
       values$df_data
     } else {
       values$sel.table 
@@ -117,7 +121,7 @@ shinyServer(function(input, output, session) {
  #--------------------------- summary table -------------------------
   output$summary <- renderPrint({ 
     summary(values$df_data)
-    input$goback
+    input$factors
   })
    
 })
