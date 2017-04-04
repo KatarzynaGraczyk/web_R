@@ -16,15 +16,19 @@ shinyServer(function(input, output, session) {
                   progress <- Progress$new(session, min = 1, max = 15)
                   on.exit(progress$close())
                   progress$set(message = 'Reading table in progress ...')
-                  values$df_data <- fread(input$file$datapath,  h = T)
+                  values$df_data <- NULL
+                  if (length(scan(input$file$datapath, what = "character", nmax = 2)) > 0) {
+                    values$df_data <- fread(input$file$datapath,  h = T)
+                  }
+                  }
                  }
-                }
                )
   
   # check if a user read data
   check.data <- reactive({
     validate(
-      need(values$df_data, "Please read file with your data")
+      need(is.null(values$df_data) == FALSE, "Please read file with your data")#,
+      #need(is.null(values$df_data) == FALSE & is.null(input$file$datapath) == FALSE, "Readed empty file. Please read file with your data")
     )
   })
   
@@ -40,16 +44,21 @@ shinyServer(function(input, output, session) {
                  )
   })
   
+  check.variable <- reactive({
+    validate(
+      need(length(input$variable) > 0, "")
+    )
+  })
+  
   # render selection of variables to remove
   output$factorselect <- renderUI({ 
-    if (length(input$variable) > 0) {
-      levelnames <- unique(values$df_data[[input$variable]])
-      selectInput(inputId = "factors", 
-                  label = "Select group of variables to remove:", 
-                  choices = levelnames, 
-                  multiple = T
-                  )
-      }
+    check.variable()
+    levelnames <- unique(values$df_data[[input$variable]])
+    selectInput(inputId = "factors", 
+                label = "Select group of variables to remove:", 
+                choices = levelnames, 
+                multiple = T
+                )
     })
   
   # if the user select values to remove, this function filter out this selected rows
@@ -69,6 +78,7 @@ shinyServer(function(input, output, session) {
       values$sel.table 
     }
   })
+  
 # -------------------------- UI rendering - update select input - PLOTS ----------------------
 
   # render new variables names in plot tabs
@@ -90,13 +100,16 @@ shinyServer(function(input, output, session) {
     plot.dat$main <- ggplot(data = values$df_data, 
                             mapping = aes(x = values$df_data[[input$variable.x]], 
                                           y = values$df_data[[input$variable.y]]
-                                          )) + 
+                                          )
+                            ) + 
       theme(axis.text.x = element_text(angle = 90, hjust = 0.5), 
-            plot.title = element_text(hjust = 0.5)) +
+            plot.title = element_text(hjust = 0.5)
+            ) +
       labs(list(title = paste(input$variable.x, "vs" ,input$variable.y, sep = " "), 
                 x = input$variable.x, 
                 y = input$variable.y, 
-                color = "Group by:\n"))
+                color = "Group by:\n")
+           )
     
     # define plot GEOMETRY
     if (input$plottype == "box") {
@@ -105,7 +118,7 @@ shinyServer(function(input, output, session) {
             plot.dat$layer <- geom_boxplot()
             } else {
               plot.dat$layer <- geom_boxplot(mapping = aes(colour = values$df_data[[input$variable.color]]))
-              }
+            }
           }
         )
       }
