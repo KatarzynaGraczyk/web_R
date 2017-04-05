@@ -8,8 +8,12 @@ shinyServer(function(input, output, session) {
 
 #-------------------------------- Table reading ---------------------------
   
-  values <- reactiveValues(df_data = NULL, sel.table = NULL)
+  values <- reactiveValues(df_data = NULL, sel.table = NULL, length.cont = 0)
   
+  content.file <- reactive({
+    length(scan(input$file$datapath, what = "character", nmax = 2))
+    })
+    
   # read data 
   observeEvent(input$read, 
                {if (is.null(input$file$datapath) == FALSE) {
@@ -17,21 +21,29 @@ shinyServer(function(input, output, session) {
                   on.exit(progress$close())
                   progress$set(message = 'Reading table in progress ...')
                   values$df_data <- NULL
-                  if (length(scan(input$file$datapath, what = "character", nmax = 2)) > 0) {
+                  values$length.cont <- length(scan(input$file$datapath, what = "character", nmax = 2))
+                  if ( values$length.cont > 0) {
                     values$df_data <- fread(input$file$datapath,  h = T)
                   }
                   }
                  }
                )
   
-  # check if a user read data
-  check.data <- reactive({
-    validate(
-      need(is.null(values$df_data) == FALSE, "Please read file with your data")#,
-      #need(is.null(values$df_data) == FALSE & is.null(input$file$datapath) == FALSE, "Readed empty file. Please read file with your data")
-    )
-  })
+  #check if a user read data
+  messageToUser <- function(val_1, val_2) {
+    if (val_1 == 0  & is.null(val_2) == TRUE) {
+      "Please read file with your data"
+    } else if ( val_1 == 0 & is.null(val_2) == FALSE) {
+      "Readed empty file. Please read file with your data"
+    } else (NULL)
+  }
   
+   check.data <- reactive({
+     validate(
+       messageToUser(values$length.cont, input$file$datapath)
+     )
+   })
+        
   # render button box 
   output$factorcheckboxes <- renderUI({
     check.data()
@@ -83,7 +95,7 @@ shinyServer(function(input, output, session) {
 
   # render new variables names in plot tabs
   observe({
-    check.data()
+    #check.data()
     updateSelectInput(session, "variable.x", choices = colnames(values$df_data))
     updateSelectInput(session, "variable.y",  choices = colnames(values$df_data))
     updateSelectInput(session, "variable.color", choices = c("NULL",colnames(values$df_data)))
@@ -150,7 +162,7 @@ shinyServer(function(input, output, session) {
     
     # download button 
     output$downloadbutton <- renderUI({
-      check.data()
+      #check.data()
       downloadButton(outputId = "download", 
                      label = " Download the plot")
       })
@@ -158,7 +170,7 @@ shinyServer(function(input, output, session) {
    
   # download parameter generation
    observe({
-     check.data()
+     #check.data()
      output$plot <- renderPlot({plot.dat$main + plot.dat$layer})
      output$download <- downloadHandler(
        # specify the file name
