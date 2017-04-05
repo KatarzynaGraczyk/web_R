@@ -9,10 +9,6 @@ shinyServer(function(input, output, session) {
 #-------------------------------- Table reading ---------------------------
   
   values <- reactiveValues(df_data = NULL, sel.table = NULL, length.cont = 0)
-  
-  content.file <- reactive({
-    length(scan(input$file$datapath, what = "character", nmax = 2))
-    })
     
   # read data 
   observeEvent(input$read, 
@@ -29,7 +25,7 @@ shinyServer(function(input, output, session) {
                  }
                )
   
-  #check if a user read data
+  # check if a user read data
   messageToUser <- function(val_1, val_2) {
     if (val_1 == 0  & is.null(val_2) == TRUE) {
       "Please read file with your data"
