@@ -7,32 +7,32 @@ library(data.table)
 shinyServer(function(input, output, session) {
 
 #-------------------------------- Table reading ---------------------------
-  
+  # variable stored data (raw and filtered)
   values <- reactiveValues(df_data = NULL, sel.table = NULL, length.cont = 0)
     
   # read data 
-  observeEvent(input$read, 
+  observeEvent(input$file, 
                {if (is.null(input$file$datapath) == FALSE) {
-                  progress <- Progress$new(session, min = 1, max = 15)
+                  progress <- Progress$new(session)
                   on.exit(progress$close())
                   progress$set(message = 'Reading table in progress ...')
                   values$df_data <- NULL
                   values$length.cont <- length(scan(input$file$datapath, what = "character", nmax = 2))
                   if ( values$length.cont > 0) {
                     values$df_data <- fread(input$file$datapath,  h = T)
-                  }
+                    }
                   }
                  }
                )
   
-  # check if a user read data
+  # check if  user read data
   messageToUser <- function(val_1, val_2) {
     if (val_1 == 0  & is.null(val_2) == TRUE) {
       "Please read file with your data"
-    } else if ( val_1 == 0 & is.null(val_2) == FALSE) {
-      "Readed empty file. Please read file with your data"
-    } else (NULL)
-  }
+      } else if ( val_1 == 0 & is.null(val_2) == FALSE) {
+        "Read empty file. Please read file with some data"
+      } else (NULL)
+    }
   
    check.data <- reactive({
      validate(
@@ -62,25 +62,56 @@ shinyServer(function(input, output, session) {
   output$factorselect <- renderUI({ 
     check.variable()
     levelnames <- unique(values$df_data[[input$variable]])
-    selectInput(inputId = "factors", 
-                label = "Select group of variables to remove:", 
-                choices = levelnames, 
-                multiple = T
-                )
+    if (is.numeric(levelnames) == TRUE & length(levelnames > 2)) {
+      maximum <- max(levelnames)
+      minimum <- min(levelnames)
+      sliderInput(inputId = "factors.slider", 
+                  label = "Select range of removed values:", 
+                  value = c(minimum - 0.3 * minimum, minimum),
+                  min = minimum - 0.3 * minimum, 
+                  max = maximum, 
+                  round = TRUE)
+    } else {
+      selectInput(inputId = "factors", 
+                  label = "Select group of variables to remove:", 
+                  choices = levelnames, 
+                  multiple = T
+                  )
+    }
     })
+  
+  # output$cleardata <- renderUI({
+  #   check.variable()
+  #   actionButton(inputId = "clear", label = "Clear data")
+  # })
+  # 
+  # observeEvent(input$clear, {
+  #   values$df_data = NULL
+  #   output$cleardata <- removeUI(selector = "clear")
+  #   }
+  #   )
   
   # if the user select values to remove, this function filter out this selected rows
   observeEvent(input$factors, {
     if ( is.null(input$factors)) {
       values$sel.table = NULL
     } else {
-    values$sel.table <- values$df_data[-which(values$df_data[[input$variable]] %in% input$factors), ]
+      values$sel.table <- values$df_data[-which(values$df_data[[input$variable]] %in% input$factors), ]
     }
     })
   
+  # observeEvent(input$factors.slider, {
+  #   if ( is.null(input$factors.slider)) {
+  #     values$sel.table = NULL
+  #   } else {
+  #     values$sel.table <- values$df_data[-which(values$df_data[[input$variable]] < input$factors.slider[1] & 
+  #                                               values$df_data[[input$variable]] > input$factors.slider[2] ), ]
+  #   }
+  # })
+  
   # rendering table, if some values are excluded by user changed table is rendered
   output$table = renderDataTable({
-    if (is.null(input$factors)) {
+    if (is.null(input$factors) ) {
       values$df_data
     } else {
       values$sel.table 
@@ -194,7 +225,7 @@ shinyServer(function(input, output, session) {
   
  #--------------------------- summary table -------------------------
   output$summary <- renderPrint({ 
-    summary(values$df_data)
+    #summary(values$df_data)
   })
    
 })
