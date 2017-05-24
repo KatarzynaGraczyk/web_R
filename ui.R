@@ -27,12 +27,16 @@ shinyUI(
                        fluidPage(theme = shinytheme("united"),
                                  sidebarLayout(
                                    sidebarPanel(
+                                     selectInput("selectdata", label = "Select type of data", 
+                                                 choices = list("Raw data set" = 1, "Filtered data set" = 2,
+                                                                selected = 1)),
                                      radioButtons("plottype",
                                                   label = "Select type of plot",
                                                   choices = list("Boxplot" = "box",
                                                                  "Scatterplot" = "scat",
                                                                  "Histogram" = "hist"
                                                                  ),
+                                                  
                                                   selected = 1, inline = TRUE),
                                      hr(),
                                      br(),

@@ -13,24 +13,24 @@ shinyServer(function(input, output, session) {
   # read data 
   observeEvent(input$file, 
                {if (is.null(input$file$datapath) == FALSE) {
-                  progress <- Progress$new(session)
-                  on.exit(progress$close())
-                  progress$set(message = 'Reading table in progress ...')
-                  values$df_data <- NULL
-                  values$length.cont <- length(scan(input$file$datapath, what = "character", nmax = 2))
-                  if ( values$length.cont > 0) {
-                    values$df_data <- fread(input$file$datapath,  h = T)
-                    }
-                  }
+                 progress <- Progress$new(session)
+                 on.exit(progress$close())
+                 progress$set(message = 'Reading table in progress ...')
+                 values$df_data <- NULL
+                 values$length.cont <- length(scan(input$file$datapath, what = "character", nmax = 2))
+                 if ( values$length.cont > 0) {
+                   values$df_data <- fread(input$file$datapath,  h = T)
                  }
-               )
+               }
+               }
+  )
   
   # check if  user read data
   messageToUser <- function(val_1, val_2) {
     if (val_1 == 0  & is.null(val_2) == TRUE) {
       "Please read file with your data"
       } else if ( val_1 == 0 & is.null(val_2) == FALSE) {
-        "Read empty file. Please read file with some data"
+        "Empty file was read. Please read file with data"
       } else (NULL)
     }
   
@@ -41,16 +41,16 @@ shinyServer(function(input, output, session) {
    })
         
   # render button box 
-  output$factorcheckboxes <- renderUI({
-    check.data()
-    factornames <- colnames(values$df_data)
-    radioButtons(inputId = "variable",
-                 label = "Select one from avaliable variables:", 
-                 choices = factornames, 
-                 selected = "all", 
-                 inline = FALSE 
-                 )
-  })
+   output$factorcheckboxes <- renderUI({
+     check.data()
+     factornames <- colnames(values$df_data)
+     radioButtons(inputId = "variable",
+                  label = "Select one from avaliable variables:", 
+                  choices = factornames, 
+                  selected = "all", 
+                  inline = FALSE 
+     )
+   })
   
   check.variable <- reactive({
     validate(
@@ -67,18 +67,20 @@ shinyServer(function(input, output, session) {
       minimum <- min(levelnames)
       sliderInput(inputId = "factors.slider", 
                   label = "Select range of removed values:", 
-                  value = c(minimum - 0.3 * minimum, minimum),
-                  min = minimum - 0.3 * minimum, 
-                  max = maximum, 
+                  value = c(minimum, maximum),
+                  min = ceiling(minimum), 
+                  max = floor(maximum), 
+                  step = ifelse(maximum - minimum < 10, 0.2, 1), 
+                  animate = F,
                   round = TRUE)
     } else {
       selectInput(inputId = "factors", 
                   label = "Select group of variables to remove:", 
                   choices = levelnames, 
                   multiple = T
-                  )
+      )
     }
-    })
+  })
   
   # output$cleardata <- renderUI({
   #   check.variable()
@@ -100,18 +102,16 @@ shinyServer(function(input, output, session) {
     }
     })
   
-  # observeEvent(input$factors.slider, {
-  #   if ( is.null(input$factors.slider)) {
-  #     values$sel.table = NULL
-  #   } else {
-  #     values$sel.table <- values$df_data[-which(values$df_data[[input$variable]] < input$factors.slider[1] & 
-  #                                               values$df_data[[input$variable]] > input$factors.slider[2] ), ]
-  #   }
-  # })
+  observeEvent(input$factors.slider, {
+    if (is.null(input$factors.slider) == FALSE) {
+      values$sel.table <- values$df_data[which(values$df_data[[input$variable]] > input$factors.slider[1] &
+                                                  values$df_data[[input$variable]] < input$factors.slider[2]), ]
+    }
+  })
   
   # rendering table, if some values are excluded by user changed table is rendered
   output$table = renderDataTable({
-    if (is.null(input$factors) ) {
+    if ((is.null(input$factors) | length(input$factors) == 0) & is.null(input$factors.slider) ) {
       values$df_data
     } else {
       values$sel.table 
@@ -225,6 +225,8 @@ shinyServer(function(input, output, session) {
   
  #--------------------------- summary table -------------------------
   output$summary <- renderPrint({ 
+    
+    list(input$factors.slider, input$variable)
     #summary(values$df_data)
   })
    
