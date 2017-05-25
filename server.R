@@ -133,6 +133,12 @@ shinyServer(function(input, output, session) {
   # crete reactive values to store readed data
   plot.dat <- reactiveValues(main = NULL, layer = NULL)
   
+  # Reqiure testing: 
+   toListen <- reactive({
+    list(input$plottype,input$variable.x, input$variable.y, input$variable.color)
+  })
+  # --> next toListen in observeEvent below (plot generation) 
+  
   # define input to render plot
   observeEvent(input$plottype, {
     # define general layout of plot
